@@ -1,0 +1,32 @@
+# Training outputs (large; do not commit)
+logs/
+**/exported_data/
+**/exported_policies/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+humanoid.egg-info/
+
+# Local / env
+.venv/
+venv/
+.env
+*.log
+MUJOCO_LOG.TXT
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# Optional: large local sim dumps (uncomment if needed)
+# sim_data/
