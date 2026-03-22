@@ -14,6 +14,14 @@
 |:---:|
 | ![](results/training_curves.png) |
 
+### MuJoCo sim2sim 录屏
+
+使用 `humanoid/scripts/sim2sim.py`，将 **baseline** 策略导出为 JIT 后在 MuJoCo 中回放并录屏。属于**跨仿真器**验证；**OOD 延迟的定量结论仍以 Isaac Gym 评估为准**。
+
+<video src="results/mujoco_sim2sim_baseline.mp4" controls width="100%"></video>
+
+[下载 `mujoco_sim2sim_baseline.mp4`](results/mujoco_sim2sim_baseline.mp4)
+
 **复现图表与汇总：** 命令见 [`results/README.md`](results/README.md)（合并 CSV、`scripts/analyze_dof_lag_ood.py` 等）。
 
 ---
