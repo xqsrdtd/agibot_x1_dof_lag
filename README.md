@@ -14,13 +14,11 @@ This repository extends the AgiBot X1 `x1_dh_stand` training stack with a **base
 |:---:|
 | ![](results/training_curves.png) |
 
-### Sim2sim (MuJoCo) video
+### Sim2sim (MuJoCo) demo (GIF)
 
 Screen recording of a **baseline** policy (exported JIT) rolled out in MuJoCo via `humanoid/scripts/sim2sim.py`. This is **cross-simulator** validation; OOD lag metrics remain from Isaac Gym eval above.
 
-<video src="results/mujoco_sim2sim_baseline.mp4" controls width="100%"></video>
-
-[Download `mujoco_sim2sim_baseline.mp4`](results/mujoco_sim2sim_baseline.mp4)
+![](results/mujoco_sim2sim_baseline.gif)
 
 **Reproduce analysis / plots:** commands are documented in [`results/README.md`](results/README.md) (merge CSVs, run `scripts/analyze_dof_lag_ood.py`).
 
