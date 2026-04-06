@@ -44,6 +44,7 @@ class RolloutStorage:
             self.actions_log_prob = None
             self.action_mean = None
             self.action_sigma = None
+            self.rollout_from_diffusion = None
             self.hidden_states = None
             self.next_proprio_obs = None
         
@@ -75,6 +76,7 @@ class RolloutStorage:
         self.advantages = torch.zeros(num_transitions_per_env, num_envs, 1, device=self.device)
         self.mu = torch.zeros(num_transitions_per_env, num_envs, *actions_shape, device=self.device)
         self.sigma = torch.zeros(num_transitions_per_env, num_envs, *actions_shape, device=self.device)
+        self.rollout_from_diffusion = torch.zeros(num_transitions_per_env, num_envs, 1, device=self.device)
 
         self.num_transitions_per_env = num_transitions_per_env
         self.num_envs = num_envs
@@ -100,6 +102,10 @@ class RolloutStorage:
         self.actions_log_prob[self.step].copy_(transition.actions_log_prob.view(-1, 1))
         self.mu[self.step].copy_(transition.action_mean)
         self.sigma[self.step].copy_(transition.action_sigma)
+        if transition.rollout_from_diffusion is not None:
+            self.rollout_from_diffusion[self.step].copy_(transition.rollout_from_diffusion.view(-1, 1))
+        else:
+            self.rollout_from_diffusion[self.step].zero_()
         self._save_hidden_states(transition.hidden_states)
         if self.num_single_obs is not None:
             self.next_proprio_obs[self.step].copy_(transition.next_proprio_obs)
@@ -167,6 +173,7 @@ class RolloutStorage:
         advantages = self.advantages.flatten(0, 1)
         old_mu = self.mu.flatten(0, 1)
         old_sigma = self.sigma.flatten(0, 1)
+        rollout_from_diffusion = self.rollout_from_diffusion.flatten(0, 1)
         if self.num_single_obs is not None:
             next_proprio_obs = self.next_proprio_obs.flatten(0, 1)
             rewards = self.rewards.flatten(0, 1)
@@ -189,8 +196,10 @@ class RolloutStorage:
                 if self.num_single_obs is not None:
                     next_proprio_obs_batch = next_proprio_obs[batch_idx]
                     rewards_batch = rewards[batch_idx]
+                    rollout_fd_batch = rollout_from_diffusion[batch_idx]
                     yield next_proprio_obs_batch, rewards_batch, obs_batch, critic_observations_batch, actions_batch, target_values_batch, advantages_batch, returns_batch, \
-                        old_actions_log_prob_batch, old_mu_batch, old_sigma_batch, (None, None), None
+                        old_actions_log_prob_batch, old_mu_batch, old_sigma_batch, rollout_fd_batch, (None, None), None
                 else:
+                    rollout_fd_batch = rollout_from_diffusion[batch_idx]
                     yield obs_batch, critic_observations_batch, actions_batch, target_values_batch, advantages_batch, returns_batch, \
-                        old_actions_log_prob_batch, old_mu_batch, old_sigma_batch, (None, None), None
+                        old_actions_log_prob_batch, old_mu_batch, old_sigma_batch, rollout_fd_batch, (None, None), None

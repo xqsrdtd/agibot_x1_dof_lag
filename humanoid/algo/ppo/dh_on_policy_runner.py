@@ -162,7 +162,9 @@ class DHOnPolicyRunner:
                 start = stop
                 self.alg.compute_returns(critic_obs)
 
-            mean_value_loss, mean_surrogate_loss, mean_state_estimator_loss = self.alg.update()
+            mean_value_loss, mean_surrogate_loss, mean_state_estimator_loss, mean_diffusion_loss, mean_diffusion_align_loss = (
+                self.alg.update()
+            )
             stop = time.time()
             learn_time = stop - start
             if self.log_dir is not None:
@@ -213,6 +215,15 @@ class DHOnPolicyRunner:
         self.writer.add_scalar(
             "Loss/state_estimator", locs["mean_state_estimator_loss"], locs["it"]
         )
+        if "mean_diffusion_loss" in locs:
+            self.writer.add_scalar(
+                "Loss/diffusion_reg", locs["mean_diffusion_loss"], locs["it"]
+            )
+        self.writer.add_scalar(
+            "Loss/diffusion_align",
+            locs.get("mean_diffusion_align_loss", 0.0),
+            locs["it"],
+        )
         self.writer.add_scalar("Loss/learning_rate", self.alg.learning_rate, locs["it"])
         self.writer.add_scalar("Policy/mean_noise_std", mean_std.item(), locs["it"])
         self.writer.add_scalar("Perf/total_fps", fps, locs["it"])
@@ -256,6 +267,8 @@ class DHOnPolicyRunner:
                 f"""{'Value function loss:':>{pad}} {locs['mean_value_loss']:.4f}\n"""
                 f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
                 f"""{'State estimator loss:':>{pad}} {locs['mean_state_estimator_loss']:.4f}\n"""
+                f"""{'Diffusion prior loss:':>{pad}} {locs['mean_diffusion_loss']:.4f}\n"""
+                f"""{'Diffusion align loss:':>{pad}} {locs.get('mean_diffusion_align_loss', 0.0):.4f}\n"""
                 f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n"""
                 f"""{'Mean reward:':>{pad}} {statistics.mean(locs['rewbuffer']):.2f}\n"""
                 f"""{'Mean episode length:':>{pad}} {statistics.mean(locs['lenbuffer']):.2f}\n"""
@@ -270,6 +283,8 @@ class DHOnPolicyRunner:
                             'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n"""
                 f"""{'Value function loss:':>{pad}} {locs['mean_value_loss']:.4f}\n"""
                 f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
+                f"""{'Diffusion prior loss:':>{pad}} {locs['mean_diffusion_loss']:.4f}\n"""
+                f"""{'Diffusion align loss:':>{pad}} {locs.get('mean_diffusion_align_loss', 0.0):.4f}\n"""
                 f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n"""
             )
             #   f"""{'Mean reward/step:':>{pad}} {locs['mean_reward']:.2f}\n"""
@@ -287,16 +302,19 @@ class DHOnPolicyRunner:
         print(log_string)
 
     def save(self, path, infos=None):
-        torch.save(
-            {
-                "model_state_dict": self.alg.actor_critic.state_dict(),
-                "optimizer_state_dict": self.alg.optimizer.state_dict(),
-                "es_optimizer_state_dict": self.alg.state_estimator_optimizer.state_dict(),
-                "iter": self.it,
-                "infos": infos,
-            },
-            path,
-        )
+        payload = {
+            "model_state_dict": self.alg.actor_critic.state_dict(),
+            "optimizer_state_dict": self.alg.optimizer.state_dict(),
+            "es_optimizer_state_dict": self.alg.state_estimator_optimizer.state_dict(),
+            "iter": self.it,
+            "infos": infos,
+        }
+        if getattr(self.alg, "diffusion_prior", None) is not None and getattr(
+            self.alg, "diffusion_optimizer", None
+        ) is not None:
+            payload["diffusion_state_dict"] = self.alg.diffusion_prior.state_dict()
+            payload["diffusion_optimizer_state_dict"] = self.alg.diffusion_optimizer.state_dict()
+        torch.save(payload, path)
 
     def load(self, path, load_optimizer=True):
         loaded_dict = torch.load(path)
@@ -304,6 +322,12 @@ class DHOnPolicyRunner:
         if load_optimizer:
             self.alg.optimizer.load_state_dict(loaded_dict["optimizer_state_dict"])
             self.alg.state_estimator_optimizer.load_state_dict(loaded_dict["es_optimizer_state_dict"])
+        if "diffusion_state_dict" in loaded_dict and getattr(self.alg, "diffusion_prior", None) is not None:
+            self.alg.diffusion_prior.load_state_dict(loaded_dict["diffusion_state_dict"])
+        if load_optimizer and "diffusion_optimizer_state_dict" in loaded_dict:
+            opt = getattr(self.alg, "diffusion_optimizer", None)
+            if opt is not None:
+                opt.load_state_dict(loaded_dict["diffusion_optimizer_state_dict"])
         self.current_learning_iteration = loaded_dict["iter"]
         return loaded_dict["infos"]
 

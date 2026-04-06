@@ -1,0 +1,3 @@
+task,seed,experiment_name,load_run,checkpoint,model_path,num_envs,num_episodes,enable_dof_lag,dof_lag_min,dof_lag_max,dof_lag_mode,lin_vel_mae,ang_vel_mae,active_cmd_ratio,tau2_mean,power_abs_mean,timeout_rate,fall_rate
+x1_dh_stand,0,x1_dh_stand,2026-04-03_16-39-03_weakrl_seed0_env2048,3500,,256,200,False,0,0,fixed,0.12182167390710674,0.2481363901752047,0.8021009506192058,2065.1445269584656,226.39243215322495,0.9882812499999999,0.01171875
+x1_dh_stand,0,x1_dh_stand,2026-04-03_23-26-29_weakrl_adv_pos_seed0,-1,,256,200,False,0,0,fixed,0.11980316042900084,0.23387594521045685,0.7997036576271057,2073.508544921875,214.79899597167972,1.0,0.0

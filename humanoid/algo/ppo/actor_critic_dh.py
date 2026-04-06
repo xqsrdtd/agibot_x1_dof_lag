@@ -161,12 +161,15 @@ class ActorCriticDH(nn.Module):
         mean = self.actor(observations)
         self.distribution = Normal(mean, mean*0. + self.std)
 
-    def act(self, observations, **kwargs):
+    def prepare_action_distribution(self, observations, **kwargs):
         short_history = observations[...,-self.num_short_obs:]
         es_vel = self.state_estimator(short_history)
         compressed_long_history = self.long_history(observations.view(-1, self.in_channels, self.num_proprio_obs))
         actor_obs = torch.cat((short_history, es_vel, compressed_long_history),dim=-1)
         self.update_distribution(actor_obs)
+
+    def act(self, observations, **kwargs):
+        self.prepare_action_distribution(observations, **kwargs)
         return self.distribution.sample()
     
     def get_actions_log_prob(self, actions):

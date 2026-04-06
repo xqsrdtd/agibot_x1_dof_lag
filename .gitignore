@@ -30,3 +30,8 @@ MUJOCO_LOG.TXT
 
 # Optional: large local sim dumps (uncomment if needed)
 # sim_data/
+
+# Large offline datasets / tensors (use Git LFS or release assets if sharing)
+results/**/*.pt
+*.pre_agg_fix_bak
+*.pre_rowwise_rescale_bak

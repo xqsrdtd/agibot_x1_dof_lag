@@ -165,13 +165,18 @@ def evaluate(env, policy, num_episodes: int) -> EvalResult:
             n = int(torch.sum(dones).item())
             if n <= 0:
                 continue
-            finished += n
+            remaining = num_episodes - finished
+            # ep[k] is the mean over the n envs that finished this step; only count up to `remaining`
+            # episodes toward the aggregate. Otherwise (e.g. n=512, remaining=200) we would add 512
+            # copies into sums but divide by 200 in mean(), inflating metrics by n/remaining (~2.5x).
+            m = min(n, remaining)
+            finished += m
             ep = infos.get("episode", {})
             for k in keys:
                 if k in ep:
-                    sums[k] += float(ep[k].item()) * n
+                    sums[k] += float(ep[k].item()) * m
 
-    return EvalResult(num_episodes=min(finished, num_episodes), metrics_sum=sums)
+    return EvalResult(num_episodes=finished, metrics_sum=sums)
 
 
 def append_csv(path: str, row: Dict[str, Any]):

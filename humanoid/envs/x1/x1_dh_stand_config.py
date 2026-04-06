@@ -464,16 +464,40 @@ class X1DHStandCfgPPO(LeggedRobotCfgPPO):
         in_channels = X1DHStandCfg.env.frame_stack
 
     class algorithm(LeggedRobotCfgPPO.algorithm):
-        entropy_coef = 0.001
+        entropy_coef = 0.003
         learning_rate = 1e-5
         num_learning_epochs = 2
         gamma = 0.994
         lam = 0.9
-        num_mini_batches = 4
+        num_mini_batches = 16
         if X1DHStandCfg.terrain.measure_heights:
             lin_vel_idx = (X1DHStandCfg.env.single_num_privileged_obs + X1DHStandCfg.terrain.num_height) * (X1DHStandCfg.env.c_frame_stack - 1) + X1DHStandCfg.env.single_linvel_index
         else:
             lin_vel_idx = X1DHStandCfg.env.single_num_privileged_obs * (X1DHStandCfg.env.c_frame_stack - 1) + X1DHStandCfg.env.single_linvel_index
+
+        # Diffusion prior regularization (weak RL transition)
+        # To disable, set `diffusion_reg_coef = 0.0` (it will also skip loading the prior).
+        use_diffusion_reg = True
+        diffusion_reg_coef = 3e-4
+        # DPPO-v0 style: advantage-weighted denoise regularization
+        diffusion_adv_weighted = True
+        diffusion_adv_weight_mode = "positive"  # positive | abs | signed
+        diffusion_prior_ckpt_path = "/home/wuyou/humanoid_rl/diffusion_policy-main/data/outputs/2026.04.02/17.22.10_train_diffusion_unet_lowdim_x1_doflag_h1_nolagtok_x1_doflag_lowdim_nolagtok/checkpoints/latest.ckpt"
+        # DPPO-style next step: online finetune the frozen diffusion UNet (same denoise loss + coef; separate Adam).
+        diffusion_finetune = True
+        diffusion_finetune_lr = 1e-6
+        diffusion_finetune_max_grad_norm = 0.5
+        # Next DPPO step: MSE(actor mean, diffusion-sampled action); sampling path detached (PPO rollout unchanged).
+        diffusion_actor_align_coef = 1e-3  # try e.g. 5e-4 .. 5e-3; increases compute (DDPM steps when align runs).
+        diffusion_align_inference_steps = 8  # lower = faster; 15 was heavy on 3090
+        diffusion_align_every = 3  # predict_action only every N minibatches (~N× cheaper align)
+        # Per-env Bernoulli: execute diffusion action instead of Gaussian sample (slow per step). 0 = off (default).
+        diffusion_rollout_prob = 0.25
+        diffusion_rollout_inference_steps = 8
+        # On diffusion-rollout rows, scale PPO surrogate & entropy (Gaussian ratio ≠ mixture policy). 1.0 = legacy behavior.
+        diffusion_rollout_ppo_surrogate_scale = 0.25
+        # Finetune only: adv-weighted denoise(obs, a_executed) on diffusion rollout rows (reuses diffusion_adv_weighted / mode).
+        diffusion_rollout_denoise_coef = 1e-4
 
     class runner:
         policy_class_name = 'ActorCriticDH'
