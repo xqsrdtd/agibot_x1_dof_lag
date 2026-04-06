@@ -35,3 +35,4 @@ MUJOCO_LOG.TXT
 results/**/*.pt
 *.pre_agg_fix_bak
 *.pre_rowwise_rescale_bak
+overleaf_resume.tex
