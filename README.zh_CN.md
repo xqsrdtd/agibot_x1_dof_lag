@@ -23,6 +23,46 @@
 
 ---
 
+## 结果：DOF lag OOD
+
+**设定：** Baseline（`add_dof_lag=False`）与 **DR 鲁棒**（`add_dof_lag=True`，lag 在 `[0, 40]` timesteps 随机）；**评估** 在 Isaac Gym 上对更大滞后做 OOD 点扫。数值表见 [`results/dof_lag_ood_report.md`](results/dof_lag_ood_report.md)，叙事见 [`results/project_narrative.md`](results/project_narrative.md)。
+
+### Baseline vs DR（主 sweep）
+
+| 成功率 vs DOF lag | 线速度跟踪误差 (lin_vel MAE) |
+|:---:|:---:|
+| ![](results/dof_lag_ood_success.png) | ![](results/dof_lag_ood_tracking.png) |
+
+| 摔倒率 | 角速度跟踪误差 |
+|:---:|:---:|
+| ![](results/dof_lag_ood_fall_rate.png) | ![](results/dof_lag_ood_ang_vel_mae.png) |
+
+| 训练曲线（示例 run） |
+|:---:|
+| ![](results/training_curves.png) |
+
+### 多 run 合并对比（可选方法 sweep）
+
+脚本：[`scripts/plot_all_eval_runs.py`](scripts/plot_all_eval_runs.py)、[`scripts/analyze_dof_lag_ood.py`](scripts/analyze_dof_lag_ood.py)。汇总：[`results/dof_lag_ood_all_eval_report.md`](results/dof_lag_ood_all_eval_report.md)。
+
+| 成功率 | 线速度 MAE |
+|:---:|:---:|
+| ![](results/dof_lag_ood_all_eval_success.png) | ![](results/dof_lag_ood_all_eval_tracking.png) |
+
+| 摔倒率 | 角速度 MAE |
+|:---:|:---:|
+| ![](results/dof_lag_ood_all_eval_fall_rate.png) | ![](results/dof_lag_ood_all_eval_ang_vel_mae.png) |
+
+### MuJoCo sim2sim 录屏（GIF）
+
+**Baseline** 策略导出 JIT 后在 MuJoCo 中回放（`humanoid/scripts/sim2sim.py`）。**跨仿真器**定性验证；**OOD 延迟的定量结论以 Isaac Gym 评估为准。**
+
+![](results/mujoco_sim2sim_baseline.gif)
+
+**复现图表 / 合并 CSV：** [`results/README.md`](results/README.md)。
+
+---
+
 ## 快速运行
 
 ```bash
@@ -30,7 +70,7 @@ pip install -e .
 PYTHONPATH=. python humanoid/scripts/train.py --task=x1_dh_stand --headless --num_envs=<N>
 ```
 
-- **完整安装、play、JIT/ONNX 导出、sim2sim、手柄说明** 见 **[`README.zh_CN.original.md`](README.zh_CN.original.md)**（原根目录中文 README）。
+- **完整安装、play、JIT/ONNX 导出、sim2sim、手柄说明** 见 **[`docs/INSTALL_AGIBOT.zh_CN.md`](docs/INSTALL_AGIBOT.zh_CN.md)**（上游智元说明；`doc/` 下 GIF）。
 - **DOF lag 评估、合并 CSV、作图** 见 [`results/README.md`](results/README.md)、`scripts/run_eval_dof_lag_ood.sh`、`scripts/analyze_dof_lag_ood.py`。
 
 ---
@@ -42,14 +82,12 @@ humanoid/algo/ppo/dh_ppo.py      # DHPPO + 扩散相关逻辑
 humanoid/algo/ppo/actor_critic_dh.py
 humanoid/algo/ppo/rollout_storage.py   # rollout_from_diffusion
 humanoid/envs/x1/x1_dh_stand_config.py # 任务与 algorithm 超参
-docs/                            # ONEPAGE_INTRO、DIFFUSION_HEAVY_RECIPE
+docs/                            # ONEPAGE_INTRO、DIFFUSION_HEAVY_RECIPE、INSTALL_AGIBOT*
 results/、scripts/               # lag OOD 图表与评估脚本
-README.original.md               # 归档：原英文长 README
-README.zh_CN.original.md         # 归档：原中文长 README
 ```
 
 ---
 
 ## 致谢
 
-基于 **智元 AgiBot X1** 开源 RL 代码；本仓库扩展包括 DOF lag 实验、评估工具链，以及在 **`DHPPO`** 中的 **可选扩散先验与混合 rollout**。上游引用见 [`README.original.md`](README.original.md)。
+基于 **智元 AgiBot X1** 开源 RL 代码；本仓库扩展包括 DOF lag 实验、评估工具链，以及在 **`DHPPO`** 中的 **可选扩散先验与混合 rollout**。上游引用见 [`docs/INSTALL_AGIBOT.zh_CN.md`](docs/INSTALL_AGIBOT.zh_CN.md)（说明与致谢）。

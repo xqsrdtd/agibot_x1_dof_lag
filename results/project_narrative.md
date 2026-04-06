@@ -36,7 +36,7 @@
 ## 7. 可复现与材料
 
 - 图表与汇总：`results/dof_lag_ood_*.png`、`dof_lag_ood_report.md`、`dof_lag_ood_summary.csv`。
-- 复现命令见同目录 [`README.md`](README.md)；完整安装与训练说明见仓库根目录 [`README.original.md`](../README.original.md)。
+- 复现命令见同目录 [`README.md`](README.md)；完整安装与训练说明见 [`docs/INSTALL_AGIBOT.zh_CN.md`](../docs/INSTALL_AGIBOT.zh_CN.md)。
 
 ---
 

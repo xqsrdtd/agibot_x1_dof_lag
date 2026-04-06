@@ -1,28 +1,6 @@
-> **归档：** 此前根目录中文 README（DOF lag 叙事 + 智元 X1 完整安装与使用）。当前入口见 [`README.zh_CN.md`](README.zh_CN.md)。
+# 智元 AgiBot X1 — 安装与使用（上游说明）
 
-[English](README.original.md) | 中文
-
-## 本项目：DOF 延迟鲁棒性实验
-
-本仓库在智元 X1 **`x1_dh_stand`**（站立 + 速度跟踪）训练代码基础上，增加 **Baseline（训练时不加关节滞后）与 Robust（训练时对 DOF lag 做域随机，lag 采样于 `[0, 40]` timesteps）** 的对照实验，并在 Isaac Gym 中对 **更大延迟（OOD）** 做评估（例如 lag 最高到 80）。
-
-**主要结论（3 个随机种子）：** 在 **lag=0** 时，Robust 成功率不低于 Baseline，甚至略优；在 **lag=80** 时，Baseline 成功率降至 **0%**，Robust 仍约 **~90%**。数值表见 [`results/dof_lag_ood_report.md`](results/dof_lag_ood_report.md)，一页叙事见 [`results/project_narrative.md`](results/project_narrative.md)。
-
-| 成功率 vs DOF lag | 线速度跟踪误差 (lin_vel MAE) |
-|:---:|:---:|
-| ![](results/dof_lag_ood_success.png) | ![](results/dof_lag_ood_tracking.png) |
-
-| 训练曲线（示例 run） |
-|:---:|
-| ![](results/training_curves.png) |
-
-### MuJoCo sim2sim 录屏（GIF）
-
-使用 `humanoid/scripts/sim2sim.py`，将 **baseline** 策略导出为 JIT 后在 MuJoCo 中回放并录屏。属于**跨仿真器**验证；**OOD 延迟的定量结论仍以 Isaac Gym 评估为准**。
-
-![](results/mujoco_sim2sim_baseline.gif)
-
-**复现图表与汇总：** 命令见 [`results/README.md`](results/README.md)（合并 CSV、`scripts/analyze_dof_lag_ood.py` 等）。
+训练 / play / JIT·ONNX 导出 / sim2sim / 手柄（来自上游 README）。**DOF lag 实验**与扩散扩展见根目录 [`README.zh_CN.md`](../README.zh_CN.md)。
 
 ---
 
@@ -31,7 +9,7 @@
 [智元灵犀 X1](https://www.zhiyuan-robot.com/qzproduct/169.html) 是由智元研发并开源的模块化、高自由度人形机器人，X1 的软件系统基于智元开源组件 `AimRT` 作为中间件实现，并且采用强化学习方法进行运动控制。
 
 本工程为智元灵犀 X1 所使用的强化学习训练代码，可配合智元灵犀 X1 配套的[推理软件](https://aimrt.org/)进行真机和仿真的行走调试，或导入其他机器人模型进行训练。
-![](doc/id.jpg)
+![](../doc/id.jpg)
 
 ## 代码运行
 
@@ -60,13 +38,13 @@
 python humanoid/scripts/train.py --task=x1_dh_stand --run_name=<run_name> --headless
 ```
 - 训练好的模型会保存在 `logs/<experiment_name>/exported_data/<date_time><run_name>/model_<iteration>.pt`，其中 `<experiment_name>` 在 config 中定义（默认 `x1_dh_stand`）。
-![](doc/train.gif)
+![](../doc/train.gif)
 
 #### Play:
 ```bash
 python humanoid/scripts/play.py --task=x1_dh_stand --load_run=<date_time><run_name>
 ```
-![](doc/play.gif)
+![](../doc/play.gif)
 
 #### 生成 JIT 模型:
 ```bash
@@ -104,11 +82,11 @@ python humanoid/scripts/export_onnx_dh.py --task=x1_dh_stand --load_run=<date_ti
 ```bash
 python humanoid/scripts/sim2sim.py --task=x1_dh_stand --load_model <exported_policies 下的子文件夹名>
 ```
-![](doc/mujoco.gif)
+![](../doc/mujoco.gif)
 
 ### 手柄使用
 我们使用 Logitech F710 手柄。在启动 `play.py` 和 `sim2sim.py` 时，按住 4 的同时转动摇杆可以控制机器人前后、左右平移与旋转。
-![](doc/joy_map.jpg)
+![](../doc/joy_map.jpg)
 |         按键          |         命令         |
 | -------------------- |:--------------------:|
 |         4 + 1-       |         前进          |
@@ -137,7 +115,7 @@ python humanoid/scripts/sim2sim.py --task=x1_dh_stand --load_model <exported_pol
 
 ## 说明与致谢
 
-训练代码基于 **智元 AgiBot X1** 开源强化学习工程；本仓库在之上补充了 **DOF lag 实验、评估与作图脚本**，见 `results/`、`scripts/` 及上文「本项目」一节。
+训练代码基于 **智元 AgiBot X1** 开源强化学习工程；本仓库在之上补充了 **DOF lag 实验、评估与作图脚本**，见 `results/`、`scripts/` 及根目录中文 README。
 
 > 参考项目:
 >

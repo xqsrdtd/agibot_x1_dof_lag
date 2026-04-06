@@ -1,28 +1,6 @@
-> **Archived:** Previous root README (DOF lag fork narrative + full AgiBot X1 install and usage). The current entry point is [`README.md`](README.md).
+# AgiBot X1 — install & usage (upstream)
 
-English | [中文](README.zh_CN.original.md)
-
-## DOF lag robustness (this fork)
-
-This repository extends the AgiBot X1 `x1_dh_stand` training stack with a **baseline vs DOF-lag domain randomization** study. We compare training **without** actuator lag (`add_dof_lag=False`) against training **with** random per-joint lag in `[0, 40]` timesteps, then evaluate **OOD** delays (e.g. up to 80 steps) in Isaac Gym.
-
-**Takeaways (3 seeds):** at **lag=0**, the robust policy matches or improves on baseline success; at **lag=80**, baseline success drops to **0%** while the robust policy stays around **~90%**. See numeric tables in [`results/dof_lag_ood_report.md`](results/dof_lag_ood_report.md) and the one-pager [`results/project_narrative.md`](results/project_narrative.md).
-
-| Success rate vs DOF lag | Velocity tracking error (lin_vel MAE) |
-|:---:|:---:|
-| ![](results/dof_lag_ood_success.png) | ![](results/dof_lag_ood_tracking.png) |
-
-| Training curves (example runs) |
-|:---:|
-| ![](results/training_curves.png) |
-
-### Sim2sim (MuJoCo) demo (GIF)
-
-Screen recording of a **baseline** policy (exported JIT) rolled out in MuJoCo via `humanoid/scripts/sim2sim.py`. This is **cross-simulator** validation; OOD lag metrics remain from Isaac Gym eval above.
-
-![](results/mujoco_sim2sim_baseline.gif)
-
-**Reproduce analysis / plots:** commands are documented in [`results/README.md`](results/README.md) (merge CSVs, run `scripts/analyze_dof_lag_ood.py`).
+Training / play / export / sim2sim / joystick (from the upstream AgiBot README). For **DOF lag experiments** and diffusion extensions, see the root [`README.md`](../README.md).
 
 ---
 
@@ -31,7 +9,7 @@ Screen recording of a **baseline** policy (exported JIT) rolled out in MuJoCo vi
 [AgiBot X1](https://www.zhiyuan-robot.com/qzproduct/169.html) is a modular humanoid robot with high dof developed and open-sourced by AgiBot. It is built upon AgiBot's open-source framework `AimRT` as middleware and using reinforcement learning for locomotion control.
 
 This project is about the reinforcement learning training code used by AgiBot X1. It can be used in conjunction with the [inference software](https://aimrt.org/) provided with AgiBot X1 for real-robot and simulated walking debugging, or be imported to other robot models for training.
-![](doc/id.jpg)
+![](../doc/id.jpg)
 
 ## Start
 
@@ -60,13 +38,13 @@ Run scripts from the **repository root**. Entry points live under `humanoid/scri
 python humanoid/scripts/train.py --task=x1_dh_stand --run_name=<run_name> --headless
 ```
 - The trained model will be saved under `logs/<experiment_name>/exported_data/<date_time><run_name>/model_<iteration>.pt`, where `<experiment_name>` is defined in the config file (default `x1_dh_stand`).
-![](doc/train.gif)
+![](../doc/train.gif)
 
 #### Play:
 ```bash
 python humanoid/scripts/play.py --task=x1_dh_stand --load_run=<date_time><run_name>
 ```
-![](doc/play.gif)
+![](../doc/play.gif)
 
 #### Generate the JIT Model:
 ```bash
@@ -104,11 +82,11 @@ Use MuJoCo for sim2sim validation (after exporting JIT):
 ```bash
 python humanoid/scripts/sim2sim.py --task=x1_dh_stand --load_model <folder_under_exported_policies>
 ```
-![](doc/mujoco.gif)
+![](../doc/mujoco.gif)
 
 ### Usage of Joystick
 We use the Logitech F710 Joystick. When starting `play.py` and `sim2sim.py`, press and hold button 4 while rotating the joystick to control the robot to move forward/backward, strafe left/right or rotate.
-![](doc/joy_map.jpg)
+![](../doc/joy_map.jpg)
 |         Button           |         Command         |
 | -------------------- |:--------------------:|
 |         4 + 1-        |         Move forward          |
@@ -137,7 +115,7 @@ We use the Logitech F710 Joystick. When starting `play.py` and `sim2sim.py`, pre
 
 ## Acknowledgements
 
-Training code is based on the **AgiBot X1** open-source RL stack. This fork adds **DOF lag experiments, eval scripts, and result figures** under `results/` and `scripts/` as documented above.
+Training code is based on the **AgiBot X1** open-source RL stack. This fork adds **DOF lag experiments, eval scripts, and result figures** under `results/` and `scripts/` as documented in the root README.
 
 > References
 > * [GitHub - leggedrobotics/legged_gym: Isaac Gym Environments for Legged Robots](https://github.com/leggedrobotics/legged_gym)
